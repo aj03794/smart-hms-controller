@@ -1,7 +1,11 @@
 import { spawn } from 'child_process'
 import { queue } from 'async'
+import request from 'request'
 import path from 'path'
 import pm2 from 'pm2'
+import { ensureDirSync, appendFile, readdir } from 'fs-extra'
+import { cwd } from 'process'
+import { resolve as resolvePath } from 'path'
 
 export const initAppController = ({
 	publish,
@@ -16,11 +20,12 @@ export const initAppController = ({
 		filterMsgs(msg => {
 			if (msg.data) {
 				const {
+					server: { port, address },
 					appName,
 					appLocation
 				} = JSON.parse(msg.data[1])
-				if (appName && appLocation) {
-					console.log('repo and applocation exist')
+				if (appName && appLocation && port && address) {
+					console.log('properties exist')
 					return true
 				}
 			  return false
@@ -30,12 +35,72 @@ export const initAppController = ({
 		}).subscribe(msg => {
 			console.log('MSG', msg)
 			const {
+				server: {
+					port,
+					address
+				},
 				appName,
 				appLocation
 			} = JSON.parse(msg.data[1])
-			enqueue({ msg: { appName, appLocation }, queue })
+			enqueue({
+				data:{
+					port,
+					address,
+					appName,
+					appLocation
+				},
+				queue
+			})
 		})
 	})
+})
+
+const retrieveApp = ({
+	appName,
+	appLocation,
+	port,
+	address,
+	files
+}) => new Promise((resolve, reject) => {
+	console.log('FILES', files)
+	const options = {
+		method: 'GET',
+		url: `http://0.0.0.0:4200/js/bundle.js`,
+		headers: {
+			appLocation
+		}
+	}
+	const requestPromises = files.map(file => {
+		request(options, (error, response, body) => {
+			if (error) {
+				console.log('request error', error)
+				return reject()
+			}
+			console.log('RESPONSE', response.statusCode)
+			// console.log('BODY', body)
+			if (response.statusCode === 200) {
+				const appsFolder = resolvePath(cwd(), 'apps', appName)
+				ensureDirSync(appsFolder)
+				appendFile(resolvePath(appsFolder, file), body, err => {
+					if (err) {
+						console.log('error appending file', err)
+						return reject()
+					}
+					
+					return resolve()
+				})
+				// return resolve()
+			}
+			else {
+				console.log('Something went wrong')
+				reject()
+			}
+			reject()
+		})
+		resolve()
+	})
+	console.log('request promises', requestPromises)
+	return Promise.all(requestPromises).then(() => resolve())
 })
 
 const checkForExistenceOfApp = ({
@@ -77,7 +142,6 @@ const turnOnApp = ({
 	appLocation
 }) => new Promise((resolve, reject) => {
 	console.log('Turning on new app')
-	// const script = `${appLocation}/index.js`
 	const script = 'index.js'
 	console.log('script', script)
 	const options = {
@@ -96,26 +160,45 @@ const turnOnApp = ({
 
 const handleApps = ({
 	appName,
-	appLocation
+	appLocation,
+	port,
+	address
 }) => new Promise((resolve, reject) => {
-	console.log('appName', appName)
-	console.log('appLocation', appLocation)
 	checkForExistenceOfApp({ appName })
-	.then(({ appExists }) => deleteOldApp({ appExists, appName }))
-	.then(() => turnOnApp({ appName, appLocation }))
+	// .then(({ appExists }) => deleteOldApp({ appExists, appName }))
+	.then(() => readDir({ location: appLocation }))
+	.then(({ location, files }) => retrieveApp({ appName, appLocation, port, address, files }))
+	// .then(() => turnOnApp({ appName, appLocation }))
 	.then(() => resolve())
-	// return resolve()
 })
 
-export const q = ({ publish }) => queue(({ msg }, cb) => {
-	const { appName, appLocation } = msg
+export const q = ({ publish }) => queue(({ data }, cb) => {
+	const {
+		port,
+		address,
+		appName,
+		appLocation
+	} = data
 	console.log('------------------------')
-  handleApps({ appName, appLocation })
+  handleApps(data)
   .then(cb)
 })
 
-export const enqueue = ({ msg, queue }) => new Promise((resolve, reject) => {
-  console.log('Queueing message - camera: ', msg)
-  queue.push({ msg })
+export const enqueue = ({ data, queue }) => new Promise((resolve, reject) => {
+  console.log('Queueing message - camera: ', data)
+  queue.push({ data })
   return resolve()
+})
+
+const readDir = ({
+	location
+}) => new Promise((resolve, reject) => {
+	console.log('LOCATION', location)
+	return readdir(location, (err, files) => {
+		if (err) {
+			console.log('error reading dir', error)
+			return reject()
+		}
+		return resolve({ location, files })
+	})
 })

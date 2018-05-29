@@ -1,21 +1,5 @@
-// Basically have listeners, publishers, and actions
-// Need some sort of naming convention
-
 import { createClient } from 'redis'
 import { createSubject } from 'create-subject-with-filter'
-
-const providerConfigParams = {
-	getPortParams: []
-}
-
-// {
-// 	channel,
-// 	providerConfig: {
-// 		pubsub: {
-// 			getPort
-// 		}
-// 	}
-// }
 
 const clients = {} // inject this to manage scope
 
@@ -126,15 +110,4 @@ export const redis = () => ({
 				})
 		})
 	})
-})
-
-
-export const doRedisReconnect = ({ err, delay }) => new Promise((resolve, reject) => {
-	// let attempts = 0
-	// if ()
-	// console.log('HELLO')
-	setTimeout(() => {
-		console.log('Attempting to reconnect')
-		resolve({ err })
-	}, 5000)
 })
