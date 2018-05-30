@@ -3,7 +3,7 @@ import { queue } from 'async'
 import request from 'request'
 import path from 'path'
 import pm2 from 'pm2'
-import { ensureDirSync, appendFile, readdir } from 'fs-extra'
+import { ensureDirSync, appendFile, readdir, removeSync } from 'fs-extra'
 import { cwd } from 'process'
 import { resolve as resolvePath } from 'path'
 
@@ -19,12 +19,14 @@ export const initAppController = ({
 	.then(({ allMsgs, filterMsgs }) => {
 		filterMsgs(msg => {
 			if (msg.data) {
+				console.log('----->', msg.data[1])
 				const {
-					server: { port, address },
+					server,
 					appName,
-					appLocation
+					appLocation,
+					appVersion
 				} = JSON.parse(msg.data[1])
-				if (appName && appLocation && port && address) {
+				if (server && appName && appLocation && appVersion) {
 					console.log('properties exist')
 					return true
 				}
@@ -40,14 +42,16 @@ export const initAppController = ({
 					address
 				},
 				appName,
-				appLocation
+				appLocation,
+				appVersion
 			} = JSON.parse(msg.data[1])
 			enqueue({
 				data:{
 					port,
 					address,
 					appName,
-					appLocation
+					appLocation,
+					appVersion
 				},
 				queue
 			})
@@ -60,7 +64,8 @@ const retrieveApp = ({
 	appLocation,
 	port,
 	address,
-	files
+	files,
+	folder
 }) => new Promise((resolve, reject) => {
 	console.log('FILES', files)
 	const options = {
@@ -79,9 +84,9 @@ const retrieveApp = ({
 			console.log('RESPONSE', response.statusCode)
 			// console.log('BODY', body)
 			if (response.statusCode === 200) {
-				const appsFolder = resolvePath(cwd(), 'apps', appName)
-				ensureDirSync(appsFolder)
-				appendFile(resolvePath(appsFolder, file), body, err => {
+				// const appsFolder = resolvePath(cwd(), 'apps', appName)
+				ensureDirSync(folder)
+				appendFile(resolvePath(folder, file), body, err => {
 					if (err) {
 						console.log('error appending file', err)
 						return reject()
@@ -106,7 +111,6 @@ const retrieveApp = ({
 const checkForExistenceOfApp = ({
 	appName
 }) => new Promise((resolve, reject) => {
-
 	pm2.list((err, processDescriptionList) => {
 		// console.log('processDescriptionList', processDescriptionList)
 		const exists = processDescriptionList.find(element => {
@@ -120,9 +124,12 @@ const checkForExistenceOfApp = ({
 const deleteOldApp = ({
 	appExists,
 	appName,
+	folder
 }) => new Promise((resolve, reject) => {
 	if (appExists) {
 		console.log('App exists')
+		console.log('Folder to delete', folder)
+		// removeSync(appLocation)
 		pm2.delete(appName, (err) => {
 			if (err) {
 				console.log('Something went wrong deleting old app')
@@ -142,7 +149,7 @@ const turnOnApp = ({
 	appLocation
 }) => new Promise((resolve, reject) => {
 	console.log('Turning on new app')
-	const script = 'index.js'
+	const script = 'bundle.js'
 	console.log('script', script)
 	const options = {
 		name: appName,
@@ -162,13 +169,17 @@ const handleApps = ({
 	appName,
 	appLocation,
 	port,
-	address
+	address,
+	appVersion
 }) => new Promise((resolve, reject) => {
+	// const folder = resolvePath(cwd(), 'apps', appName, `${appName}-${appVersion}`)
+	const folder = resolvePath(cwd(), 'apps', appName)
+	console.log('folder', folder)
 	checkForExistenceOfApp({ appName })
-	// .then(({ appExists }) => deleteOldApp({ appExists, appName }))
+	.then(({ appExists }) => deleteOldApp({ appExists, appName, folder }))
 	.then(() => readDir({ location: appLocation }))
-	.then(({ location, files }) => retrieveApp({ appName, appLocation, port, address, files }))
-	// .then(() => turnOnApp({ appName, appLocation }))
+	.then(({ location, files }) => retrieveApp({ appName, appLocation, port, address, files, folder }))
+	.then(() => turnOnApp({ appName, appLocation }))
 	.then(() => resolve())
 })
 
@@ -177,7 +188,8 @@ export const q = ({ publish }) => queue(({ data }, cb) => {
 		port,
 		address,
 		appName,
-		appLocation
+		appLocation,
+		appVersion
 	} = data
 	console.log('------------------------')
   handleApps(data)
@@ -196,7 +208,7 @@ const readDir = ({
 	console.log('LOCATION', location)
 	return readdir(location, (err, files) => {
 		if (err) {
-			console.log('error reading dir', error)
+			console.log('error reading dir', err)
 			return reject()
 		}
 		return resolve({ location, files })
