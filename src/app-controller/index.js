@@ -77,7 +77,7 @@ const retrieveApp = ({
 				appLocation
 			}
 		}
-		request(options, (error, response, body) => {
+		return request(options, (error, response, body) => {
 			if (error) {
 				console.log('request error', error)
 				return reject()
@@ -92,21 +92,23 @@ const retrieveApp = ({
 						console.log('error appending file', err)
 						return reject()
 					}
-					
-					return resolve()
+					console.log('Finished writing to file')
+					return
 				})
 				// return resolve()
 			}
 			else {
 				console.log('Something went wrong')
-				reject()
+				return reject()
 			}
-			reject()
+			// reject()
 		})
-		resolve()
 	})
-	console.log('request promises', requestPromises)
-	return Promise.all(requestPromises).then(() => resolve())
+	console.log('request promises', requestPromises.length)
+	// setTimeout(() => {
+		Promise.all(requestPromises).then(() => resolve())
+	// }, 1000)
+
 })
 
 const checkForExistenceOfApp = ({
@@ -151,6 +153,7 @@ const turnOnApp = ({
 }) => new Promise((resolve, reject) => {
 	console.log('Turning on new app')
 	const script = 'bundle.js'
+	console.log('APPLOCATION', appLocation)
 	console.log('script', script)
 	const options = {
 		name: appName,
