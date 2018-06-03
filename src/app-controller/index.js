@@ -1,4 +1,4 @@
-import { spawn } from 'child_process'
+import { spawn, exec } from 'child_process'
 import { queue } from 'async'
 import request from 'request'
 import path from 'path'
@@ -160,6 +160,17 @@ const turnOnApp = ({
 	})
 })
 
+const saveApps = () => new Promise((resolve, reject) => {
+	exec(`pm2 save`, (err, stdout, stderr) => {
+		if (err) {
+			console.log('Error occurred when saving apps', app)
+			reject()
+		}
+		console.log('Pm2 apps saved')
+		return resolve()
+	})
+})
+
 const handleApps = ({
 	appName,
 	appLocation,
@@ -175,6 +186,7 @@ const handleApps = ({
 	.then(() => readDir({ location: appLocation }))
 	.then(({ location, files }) => retrieveApp({ appName, appLocation, port, address, files, folder }))
 	.then(() => turnOnApp({ appName, appLocation: folder }))
+	.then(() => saveApps())
 	.then(() => resolve())
 })
 
