@@ -3,7 +3,7 @@ import { queue } from 'async'
 import request from 'request'
 import path from 'path'
 import pm2 from 'pm2'
-import { ensureDirSync, appendFile, readdir, removeSync } from 'fs-extra'
+import { ensureDirSync, appendFileSync, readdir, removeSync } from 'fs-extra'
 import { cwd } from 'process'
 import { resolve as resolvePath } from 'path'
 
@@ -69,7 +69,7 @@ const retrieveApp = ({
 }) => new Promise((resolve, reject) => {
 	console.log('FILES', files)
 	
-	const requestPromises = files.map(file => {
+	const requestPromises = files.map(file => new Promise((resolve, reject) => {
 		const options = {
 			method: 'GET',
 			url: `http://0.0.0.0:4200/js/${file}`,
@@ -77,7 +77,7 @@ const retrieveApp = ({
 				appLocation
 			}
 		}
-		return request(options, (error, response, body) => {
+		request(options, (error, response, body) => {
 			if (error) {
 				console.log('request error', error)
 				return reject()
@@ -87,15 +87,8 @@ const retrieveApp = ({
 			if (response.statusCode === 200) {
 				// const appsFolder = resolvePath(cwd(), 'apps', appName)
 				ensureDirSync(folder)
-				appendFile(resolvePath(folder, file), body, err => {
-					if (err) {
-						console.log('error appending file', err)
-						return reject()
-					}
-					console.log('Finished writing to file')
-					return
-				})
-				// return resolve()
+				appendFileSync(resolvePath(folder, file), body)
+				resolve()
 			}
 			else {
 				console.log('Something went wrong')
@@ -103,12 +96,9 @@ const retrieveApp = ({
 			}
 			// reject()
 		})
-	})
-	console.log('request promises', requestPromises.length)
-	// setTimeout(() => {
-		Promise.all(requestPromises).then(() => resolve())
-	// }, 1000)
-
+	}))
+	// resolve()
+	return Promise.all(requestPromises).then(() => resolve())
 })
 
 const checkForExistenceOfApp = ({
@@ -217,4 +207,8 @@ const readDir = ({
 		}
 		return resolve({ location, files })
 	})
+})
+
+const doAppendFile = () => new Promise((resolve, reject) => {
+
 })
