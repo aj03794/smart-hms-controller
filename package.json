@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "rm -rf dist && babel src --out-dir dist",
-    "start": "npm run build && node dist/index.js",
+    "build-babel": "rm -rf dist && babel src --out-dir dist",
+    "build": "webpack",
+    "start-with-babel": "npm run build && node dist/index.js",
+    "start": "npm run build && node dist/bundle.js",
     "start-dev": "npm run build && node dist/index.js dev"
   },
   "keywords": [],
@@ -15,7 +17,8 @@
     "babel-cli": "^6.26.0",
     "babel-plugin-dynamic-import-node": "^1.2.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.6.1"
+    "babel-preset-env": "^1.6.1",
+    "clean-webpack-plugin": "^0.1.19"
   },
   "babel": {
     "presets": [
