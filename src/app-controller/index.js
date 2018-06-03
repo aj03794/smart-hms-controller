@@ -174,7 +174,7 @@ const handleApps = ({
 	.then(({ appExists }) => deleteOldApp({ appExists, appName, folder }))
 	.then(() => readDir({ location: appLocation }))
 	.then(({ location, files }) => retrieveApp({ appName, appLocation, port, address, files, folder }))
-	// .then(() => turnOnApp({ appName, appLocation: folder }))
+	.then(() => turnOnApp({ appName, appLocation: folder }))
 	.then(() => resolve())
 })
 
