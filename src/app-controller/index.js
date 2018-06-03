@@ -3,7 +3,7 @@ import { queue } from 'async'
 import request from 'request'
 import path from 'path'
 import pm2 from 'pm2'
-import { ensureDirSync, appendFileSync, readdir, removeSync } from 'fs-extra'
+import { ensureDirSync, appendFileSync, readdir, removeSync, existsSync } from 'fs-extra'
 import { cwd } from 'process'
 import { resolve as resolvePath } from 'path'
 
@@ -119,10 +119,11 @@ const deleteOldApp = ({
 	appName,
 	folder
 }) => new Promise((resolve, reject) => {
+	existsSync(folder) === true ? removeSync(folder) : null
+	console.log('deleteOldApp')
 	if (appExists) {
 		console.log('App exists')
 		console.log('Folder to delete', folder)
-		// removeSync(appLocation)
 		pm2.delete(appName, (err) => {
 			if (err) {
 				console.log('Something went wrong deleting old app')
@@ -173,7 +174,7 @@ const handleApps = ({
 	.then(({ appExists }) => deleteOldApp({ appExists, appName, folder }))
 	.then(() => readDir({ location: appLocation }))
 	.then(({ location, files }) => retrieveApp({ appName, appLocation, port, address, files, folder }))
-	.then(() => turnOnApp({ appName, appLocation: folder }))
+	// .then(() => turnOnApp({ appName, appLocation: folder }))
 	.then(() => resolve())
 })
 
@@ -207,8 +208,4 @@ const readDir = ({
 		}
 		return resolve({ location, files })
 	})
-})
-
-const doAppendFile = () => new Promise((resolve, reject) => {
-
 })
