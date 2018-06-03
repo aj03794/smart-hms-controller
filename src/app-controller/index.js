@@ -68,14 +68,15 @@ const retrieveApp = ({
 	folder
 }) => new Promise((resolve, reject) => {
 	console.log('FILES', files)
-	const options = {
-		method: 'GET',
-		url: `http://0.0.0.0:4200/js/bundle.js`,
-		headers: {
-			appLocation
-		}
-	}
+	
 	const requestPromises = files.map(file => {
+		const options = {
+			method: 'GET',
+			url: `http://0.0.0.0:4200/js/${file}`,
+			headers: {
+				appLocation
+			}
+		}
 		request(options, (error, response, body) => {
 			if (error) {
 				console.log('request error', error)
@@ -179,7 +180,7 @@ const handleApps = ({
 	.then(({ appExists }) => deleteOldApp({ appExists, appName, folder }))
 	.then(() => readDir({ location: appLocation }))
 	.then(({ location, files }) => retrieveApp({ appName, appLocation, port, address, files, folder }))
-	.then(() => turnOnApp({ appName, appLocation }))
+	.then(() => turnOnApp({ appName, appLocation: folder }))
 	.then(() => resolve())
 })
 
