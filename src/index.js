@@ -1,9 +1,20 @@
 import { redis } from './redis'
+import { slack as slackCreator } from './slack'
 import { initAppController } from './app-controller'
 
-const { publish, subscribe } = redis()
+const { publisherCreator, subscriberCreator } = redis()
 
-initAppController({
-	publish,
-	subscribe
+Promise.all([
+	publisherCreator(),
+	subscriberCreator()
+])
+.then(([
+	{ publish },
+	{ subscribe }
+]) => {
+	const slack = slackCreator({ publish })
+	return initAppController({
+		publish,
+		subscribe
+	})
 })
