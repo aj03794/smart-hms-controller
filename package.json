@@ -32,7 +32,7 @@
     "create-subject-with-filter": "0.0.5",
     "fs-extra": "^6.0.1",
     "pm2": "^2.10.4",
-    "pub-sub-redis": "0.0.2",
+    "pub-sub-redis": "0.0.3",
     "redis": "^2.8.0",
     "request": "^2.87.0"
   }
