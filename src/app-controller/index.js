@@ -9,7 +9,8 @@ import { resolve as resolvePath } from 'path'
 
 export const initAppController = ({
 	publish,
-	subscribe
+	subscribe,
+	revision
 }) => new Promise((resolve, reject) => {
 	const queue = q({ publish })
 	subscribe({
@@ -44,16 +45,51 @@ export const initAppController = ({
 				appLocation,
 				appVersion
 			} = JSON.parse(msg.data[1])
-			enqueue({
-				data:{
-					port,
-					address,
-					appName,
-					appLocation,
-					appVersion
-				},
-				queue
-			})
+			// if (revision === 'development' || 'rpi B') {
+				
+			// }
+			if (revision === 'rpi Zero W') {
+				console.log('RASPBERRY PI ZERO W')
+				switch (appName) {
+					case 'raspberry-pi-camera':
+						return enqueue({
+							data:{
+								port,
+								address,
+								appName,
+								appLocation,
+								appVersion
+							},
+							queue
+						})
+					case 'smart-hms-controller':
+						return enqueue({
+							data:{
+								port,
+								address,
+								appName,
+								appLocation,
+								appVersion
+							},
+							queue
+						})
+					default:
+						console.log('Something went wrong with switch case in smart hms controller')
+				}
+			}
+			else {
+				console.log('MODEL B or DEVELOPMENT')
+				return enqueue({
+					data:{
+						port,
+						address,
+						appName,
+						appLocation,
+						appVersion
+					},
+					queue
+				})
+			}
 		})
 	})
 })
