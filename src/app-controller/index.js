@@ -71,7 +71,7 @@ const retrieveApp = ({
 	const requestPromises = files.map(file => new Promise((resolve, reject) => {
 		const options = {
 			method: 'GET',
-			url: `http://0.0.0.0:4200/js/${file}`,
+			url: `http://${address}:${port}/js/${file}`,
 			headers: {
 				appLocation
 			}
