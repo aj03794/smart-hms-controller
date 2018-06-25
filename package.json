@@ -35,6 +35,7 @@
     "pub-sub-redis": "0.0.3",
     "redis": "^2.8.0",
     "request": "^2.87.0",
-    "rpi-info": "^1.0.4"
+    "rpi-info": "^1.0.4",
+    "unzip": "^0.1.11"
   }
 }
