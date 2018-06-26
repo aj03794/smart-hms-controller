@@ -6,7 +6,8 @@ import {
 	createReadStream,
 	createWriteStream,
 	ensureDirSync,
-	removeSync
+	removeSync,
+	existsSync
 } from 'fs-extra'
 import { cwd } from 'process'
 import unzip from 'unzip'
@@ -37,7 +38,7 @@ export const initAppController = ({
 		unzip
 	})
 	const checkForApp = checkForAppCreator({ pm2 })
-	const deleteApp = deleteAppCreator({ pm2, removeSync })
+	const deleteApp = deleteAppCreator({ pm2, removeSync, existsSync })
 	const saveApps = saveAppsCreator({ exec })
 	const retrieveApp = retrieveAppCreator({
 		resolvePath,

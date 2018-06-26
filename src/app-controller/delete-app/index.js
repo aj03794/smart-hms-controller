@@ -1,6 +1,7 @@
 export const deleteApp = ({
     pm2,
-    removeSync
+	removeSync,
+	existsSync
 }) => ({
 	appExists,
 	appName,
