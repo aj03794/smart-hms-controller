@@ -23,8 +23,10 @@ import { handleApp } from './handle-apps'
 
 export const initAppController = ({
 	publish,
-	subscribe
+	subscribe,
+	model
 }) => new Promise((resolve, reject) => {
+
 	const queue = q()
 
 	const turnOnApp = turnOnAppCreator({ resolvePath, pm2 })
@@ -53,8 +55,10 @@ export const initAppController = ({
 		subscription
 	}) => {
 		subscription.subscribe(msg => {
-			
-			enqueue({
+			const {
+				appName,
+			} = msg.data[1]
+			const executeEnqueue = () => enqueue({
 				func: handleApp({
 					checkForApp,
 					deleteApp,
@@ -67,6 +71,19 @@ export const initAppController = ({
 				})(JSON.parse(msg.data[1])),
 				queue
 			})
+			if(model === 'Zero W') {
+				switch(appName) {
+					case 'raspberry-pi-camera':
+					case 'smart-hms-controller':
+					case 'storage-service':
+					case 'slack-service':
+						return executeEnqueue()
+					default:
+						console.log('This service does not belong on zero w')
+						return
+				}
+			}
+			return executeEnqueue()
 		})
 	})
 })
