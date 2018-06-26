@@ -4,7 +4,7 @@ export const getModel = ({
     try {
         const rpi = new RPI()
         const model = rpi.getModel()
-        return resolve({ revision })
+        return resolve({ model })
     }
     catch (e) {
         if (e.code === 'ENOENT' && e.path === '/proc/cpuinfo') {
