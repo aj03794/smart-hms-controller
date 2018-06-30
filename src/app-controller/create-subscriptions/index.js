@@ -16,30 +16,12 @@ export const createSubscriptions = ({
                 } = JSON.parse(msg.data[1])
                 if (server && appName && appLocation && appVersion) {
                     console.log('properties exist')
-                    return { some: 'data' }
+                    return true
                 }
               return false
             }
             return false
-            // return  msg
         })
-        // .subscribe(msg => {
-        //     console.log('asdfadfasfa', msg)
-        //     return msg
-        // })
-        // return resolve()
-        // .subscribe(msg => {
-        //     console.log('MSG', msg)
-        //     
-            // resolve ({
-            //     port,
-            //     address,
-            //     appName,
-            //     appLocation,
-            //     appVersion
-            // })
-        // })
-        // console.log('X', x)
         resolve({
             subscription
         })

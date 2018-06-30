@@ -6,6 +6,7 @@ export const turnOnApp = ({
 	appLocation
 }) => new Promise((resolve, reject) => {
 	console.log('Turning on new app')
+	// TODO: Can make a function to return the base index.js from a folder
 	const script = 'index.js'
 	const app = resolvePath(appLocation, appName)
 	console.log('APPLOCATION', appLocation)
@@ -16,7 +17,7 @@ export const turnOnApp = ({
 	}
 	pm2.start(script, options, (err) => {
 		if (err) {
-			console.log('PROBLEM STARTING APP', err)
+			console.log(`Problem starting ${appName} - err: `, err)
 			reject()
 		}
 		console.log('Successfully turned on app')

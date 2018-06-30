@@ -1,5 +1,6 @@
 import RPI from 'rpi-info'
 
+import { q as queueCreator } from './queue'
 import { redis } from './redis'
 import { slack as slackCreator } from './slack'
 import { initAppController } from './app-controller'
@@ -12,17 +13,20 @@ const { publisherCreator, subscriberCreator } = redis({
 Promise.all([
 	publisherCreator(),
 	subscriberCreator(),
-	getModel({ RPI })
+	getModel({ RPI }),
+	queueCreator()
 ])
 .then(([
 	{ publish },
 	{ subscribe },
-	{ model }
+	{ model },
+	{ enqueue }
 ]) => {
 	const slack = slackCreator({ publish })
 	return initAppController({
 		publish,
 		subscribe,
-		model
+		model,
+		enqueue
 	})
 })

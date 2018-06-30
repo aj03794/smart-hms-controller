@@ -20,15 +20,14 @@ import { checkForApp as checkForAppCreator } from './check-for-app'
 import { deleteApp as deleteAppCreator } from './delete-app'
 import { saveApps as saveAppsCreator } from './save-apps'
 import { retrieveApp as retrieveAppCreator } from './retrieve-app'
-import { handleApp } from './handle-apps'
+import { handleApp as handleAppCreator } from './handle-app'
 
 export const initAppController = ({
 	publish,
 	subscribe,
-	model
+	model,
+	enqueue
 }) => new Promise((resolve, reject) => {
-
-	const queue = q()
 
 	const turnOnApp = turnOnAppCreator({ resolvePath, pm2 })
 	const unzipDir = unzipDirCreator({
@@ -56,45 +55,36 @@ export const initAppController = ({
 		subscription
 	}) => {
 		subscription.subscribe(msg => {
+
 			const {
 				appName,
 			} = msg.data[1]
-			const executeEnqueue = () => enqueue({
-				func: handleApp({
-					checkForApp,
-					deleteApp,
-					retrieveApp,
-					unzipDir,
-					turnOnApp,
-					saveApps,
-					resolvePath,
-					cwd
-				})(JSON.parse(msg.data[1])),
-				queue
-			})
+
+
+			const handleApp = handleAppCreator({
+				checkForApp,
+				deleteApp,
+				retrieveApp,
+				unzipDir,
+				turnOnApp,
+				saveApps,
+				resolvePath,
+				cwd
+			})(JSON.parse(msg.data[1]))
+
 			if(model === 'Zero W') {
 				switch(appName) {
 					case 'raspberry-pi-camera':
 					case 'smart-hms-controller':
 					case 'storage-service':
 					case 'slack-service':
-						return executeEnqueue()
+						return enqueue(handleApp)
 					default:
 						console.log('This service does not belong on zero w')
 						return
 				}
 			}
-			return executeEnqueue()
+			return enqueue(handleApp)
 		})
 	})
 })
-
-export const q = () => queue(({ func }, cb) => {
-	func()
-	.then(cb)
-})
-
-export const enqueue = ({ func, queue }) => {
-  console.log('Queueing...')
-  return queue.push({ func })
-}

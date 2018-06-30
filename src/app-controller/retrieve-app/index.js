@@ -29,7 +29,7 @@ export const retrieveApp = ({
         console.log('Error occurred retrieving file', err)
         reject(err)
     })
-    .on('response', function(response) {
+    .on('response', response => {
         console.log('status code', response.statusCode)
     })
     .pipe(createWriteStream(zip))

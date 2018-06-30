@@ -8,7 +8,7 @@ export const deleteApp = ({
 	folder
 }) => new Promise((resolve, reject) => {
 	existsSync(folder) === true ? removeSync(folder) : null
-	console.log('deleteOldApp')
+	console.log('Deleting old app: ', appName)
 	if (appExists) {
 		console.log('App exists')
 		console.log('Folder to delete', folder)
@@ -20,8 +20,6 @@ export const deleteApp = ({
 		})
 		return resolve()
 	}
-	else {
-		console.log('App does not exist')
-		return resolve()
-	}
+	console.log('App does not exist')
+	return resolve()
 })
