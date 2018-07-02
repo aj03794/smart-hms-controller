@@ -72,6 +72,7 @@ export const initAppController = ({
 				cwd
 			})(JSON.parse(msg.data[1]))
 
+			// Only want certain apps on the raspberry pi zero w
 			if(model === 'Zero W') {
 				switch(appName) {
 					case 'raspberry-pi-camera':
@@ -84,6 +85,7 @@ export const initAppController = ({
 						return
 				}
 			}
+			// Want all apps on the raspberry pi model 3B
 			return enqueue(handleApp)
 		})
 	})
