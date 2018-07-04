@@ -26,19 +26,23 @@ export const initAppController = ({
 	publish,
 	subscribe,
 	model,
-	enqueue
+	enqueue,
+	pm2Start,
+	pm2Delete,
+	pm2List,
+	pm2Save
 }) => new Promise((resolve, reject) => {
 
-	const turnOnApp = turnOnAppCreator({ resolvePath, pm2 })
+	const turnOnApp = turnOnAppCreator({ resolvePath, pm2Start })
 	const unzipDir = unzipDirCreator({
 		removeSync,
-		ensureDirSync,
+		ensureDir,
 		createReadStream,
 		unzip
 	})
-	const checkForApp = checkForAppCreator({ pm2 })
-	const deleteApp = deleteAppCreator({ pm2, removeSync, existsSync })
-	const saveApps = saveAppsCreator({ exec })
+	const checkForApp = checkForAppCreator({ pm2List })
+	const deleteApp = deleteAppCreator({ pm2Delete, removeSync, existsSync })
+	const saveApps = saveAppsCreator({ pm2Save })
 	const retrieveApp = retrieveAppCreator({
 		resolvePath,
 		cwd,
