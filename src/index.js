@@ -27,7 +27,7 @@ Promise.all([
 	{ 
 		pm2Start,
 		pm2Delete,
-		pm2Start,
+		pm2Save,
 		pm2List
 	}
 ]) => {
@@ -39,7 +39,7 @@ Promise.all([
 		enqueue,
 		pm2Start,
 		pm2Delete,
-		pm2Start,
+		pm2Save,
 		pm2List
 	})
 })

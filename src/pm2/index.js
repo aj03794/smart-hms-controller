@@ -7,7 +7,7 @@ export const pm2Functions = ({
     const pm2Start = ({ script, options }) => new Promise((resolve, reject) => {
         pm2.start(script, options, (err) => {
             if (err) {
-                console.log(`Problem starting ${appName} - err: `, err)
+                console.log(`Problem starting app - err: `, err)
                 reject()
             }
             console.log('Successfully turned on app')
@@ -47,7 +47,7 @@ export const pm2Functions = ({
                 return reject(err)
             }
             // resolve({ appExists: exists })
-            resolve({ processDescriptionList })
+            resolve(processDescriptionList)
         })
     })
 

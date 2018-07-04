@@ -1,19 +1,17 @@
-import { exec } from 'child_process'
-import { queue } from 'async'
 import request from 'request'
-import pm2 from 'pm2'
 import {
 	createReadStream,
 	createWriteStream,
-	ensureDirSync,
+	ensureDir,
 	removeSync,
+	remove,
 	existsSync
 } from 'fs-extra'
 import { cwd } from 'process'
 import unzip from 'unzip'
-
 import { resolve as resolvePath } from 'path'
 import { unzipDir as unzipDirCreator } from './unzip-dir'
+
 import { createSubscriptions } from './create-subscriptions'
 import { turnOnApp as turnOnAppCreator } from './turn-on-app'
 import { checkForApp as checkForAppCreator } from './check-for-app'
@@ -35,7 +33,7 @@ export const initAppController = ({
 
 	const turnOnApp = turnOnAppCreator({ resolvePath, pm2Start })
 	const unzipDir = unzipDirCreator({
-		removeSync,
+		remove,
 		ensureDir,
 		createReadStream,
 		unzip
@@ -47,7 +45,7 @@ export const initAppController = ({
 		resolvePath,
 		cwd,
 		createWriteStream,
-		ensureDirSync,
+		ensureDir,
 		request
 	})
 
@@ -63,7 +61,6 @@ export const initAppController = ({
 			const {
 				appName,
 			} = msg.data[1]
-
 
 			const handleApp = handleAppCreator({
 				checkForApp,
