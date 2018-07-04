@@ -1,6 +1,6 @@
 export const unzipDir = ({
-	removeSync,
-	ensureDirSync,
+	remove,
+	ensureDir,
 	createReadStream,
 	unzip
 }) => ({
@@ -8,23 +8,18 @@ export const unzipDir = ({
 	appFolder
 }) => new Promise((resolve, reject) => {
 	console.log(`unzipping ${zip}`)
-	ensureDirSync(appFolder)
-	createReadStream(zip)
-	.pipe(unzip.Extract({ path: appFolder }))
-	.on('close', () => {
-		deleteFileOrFolder({
-			location: zip,
-			removeSync
+	ensureDir(appFolder)
+	.then(() => new Promise((resolve, reject) => {
+		createReadStream(zip)
+		.pipe(unzip.Extract({ path: appFolder }))
+		.on('close', () => {
+			console.log('Finished unzipping directory')
+			resolve()
 		})
-		.then(() => resolve())
+	}))
+	.then(() => remove(zip))
+	.then(resolve)
+	.catch(err => {
+		console.log('unzipDir error', err)
 	})
-})
-
-const deleteFileOrFolder = ({
-	location,
-	removeSync
-}) => new Promise((resolve, reject) => {
-	console.log('Deleting file/folder:', location)
-	removeSync(location)
-	resolve()
 })

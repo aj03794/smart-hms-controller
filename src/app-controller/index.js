@@ -1,19 +1,17 @@
-import { exec } from 'child_process'
-import { queue } from 'async'
 import request from 'request'
-import pm2 from 'pm2'
 import {
 	createReadStream,
 	createWriteStream,
-	ensureDirSync,
+	ensureDir,
 	removeSync,
+	remove,
 	existsSync
 } from 'fs-extra'
 import { cwd } from 'process'
 import unzip from 'unzip'
-
 import { resolve as resolvePath } from 'path'
 import { unzipDir as unzipDirCreator } from './unzip-dir'
+
 import { createSubscriptions } from './create-subscriptions'
 import { turnOnApp as turnOnAppCreator } from './turn-on-app'
 import { checkForApp as checkForAppCreator } from './check-for-app'
@@ -26,24 +24,28 @@ export const initAppController = ({
 	publish,
 	subscribe,
 	model,
-	enqueue
+	enqueue,
+	pm2Start,
+	pm2Delete,
+	pm2List,
+	pm2Save
 }) => new Promise((resolve, reject) => {
 
-	const turnOnApp = turnOnAppCreator({ resolvePath, pm2 })
+	const turnOnApp = turnOnAppCreator({ resolvePath, pm2Start })
 	const unzipDir = unzipDirCreator({
-		removeSync,
-		ensureDirSync,
+		remove,
+		ensureDir,
 		createReadStream,
 		unzip
 	})
-	const checkForApp = checkForAppCreator({ pm2 })
-	const deleteApp = deleteAppCreator({ pm2, removeSync, existsSync })
-	const saveApps = saveAppsCreator({ exec })
+	const checkForApp = checkForAppCreator({ pm2List })
+	const deleteApp = deleteAppCreator({ pm2Delete, removeSync, existsSync })
+	const saveApps = saveAppsCreator({ pm2Save })
 	const retrieveApp = retrieveAppCreator({
 		resolvePath,
 		cwd,
 		createWriteStream,
-		ensureDirSync,
+		ensureDir,
 		request
 	})
 
@@ -60,7 +62,6 @@ export const initAppController = ({
 				appName,
 			} = msg.data[1]
 
-
 			const handleApp = handleAppCreator({
 				checkForApp,
 				deleteApp,
@@ -72,6 +73,7 @@ export const initAppController = ({
 				cwd
 			})(JSON.parse(msg.data[1]))
 
+			// Only want certain apps on the raspberry pi zero w
 			if(model === 'Zero W') {
 				switch(appName) {
 					case 'raspberry-pi-camera':
@@ -84,6 +86,7 @@ export const initAppController = ({
 						return
 				}
 			}
+			// Want all apps on the raspberry pi model 3B
 			return enqueue(handleApp)
 		})
 	})

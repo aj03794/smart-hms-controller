@@ -1,5 +1,7 @@
 import RPI from 'rpi-info'
+import pm2 from 'pm2'
 
+import { pm2Functions as pm2FunctionsCreator } from './pm2'
 import { q as queueCreator } from './queue'
 import { redis } from './redis'
 import { slack as slackCreator } from './slack'
@@ -14,19 +16,30 @@ Promise.all([
 	publisherCreator(),
 	subscriberCreator(),
 	getModel({ RPI }),
-	queueCreator()
+	queueCreator(),
+	pm2FunctionsCreator({ pm2 })
 ])
 .then(([
 	{ publish },
 	{ subscribe },
 	{ model },
-	{ enqueue }
+	{ enqueue },
+	{ 
+		pm2Start,
+		pm2Delete,
+		pm2Save,
+		pm2List
+	}
 ]) => {
 	const slack = slackCreator({ publish })
 	return initAppController({
 		publish,
 		subscribe,
 		model,
-		enqueue
+		enqueue,
+		pm2Start,
+		pm2Delete,
+		pm2Save,
+		pm2List
 	})
 })

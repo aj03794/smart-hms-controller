@@ -1,6 +1,6 @@
 export const turnOnApp = ({
     resolvePath,
-    pm2
+    pm2Start
 }) => ({
 	appName,
 	appLocation
@@ -9,18 +9,14 @@ export const turnOnApp = ({
 	// TODO: Can make a function to return the base index.js from a folder
 	const script = 'index.js'
 	const app = resolvePath(appLocation, appName)
-	console.log('APPLOCATION', appLocation)
 	console.log('script', script)
 	const options = {
 		name: appName,
 		cwd: app
 	}
-	pm2.start(script, options, (err) => {
-		if (err) {
-			console.log(`Problem starting ${appName} - err: `, err)
-			reject()
-		}
-		console.log('Successfully turned on app')
-		resolve()
+	pm2Start({ script, options })
+	.then(resolve)
+	.catch(err => {
+		console.log('turnOnApp error', err)
 	})
 })

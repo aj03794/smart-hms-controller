@@ -1,13 +1,14 @@
 export const checkForApp = ({
-    pm2
+    pm2List
 }) => ({
 	appName
 }) => new Promise((resolve, reject) => {
-	pm2.list((err, processDescriptionList) => {
-		const exists = processDescriptionList.find(element => {
-			return element.name === appName
+	pm2List()
+	.then(processes => {
+		const match = processes.find(process => {
+			process.name === appName
 		}) ? true : false
-		console.log('App exists:', exists)
-		resolve({ appExists: exists })
+		return Promise.resolve(match)
 	})
+	.then(match => resolve({ appExists: match}))
 })
