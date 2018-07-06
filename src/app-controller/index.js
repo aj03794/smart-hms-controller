@@ -74,6 +74,7 @@ export const initAppController = ({
 			})(JSON.parse(msg.data[1]))
 
 			// Only want certain apps on the raspberry pi zero w
+			console.log('MODEL', model)
 			if(model === 'Zero W') {
 				switch(appName) {
 					case 'raspberry-pi-camera':
