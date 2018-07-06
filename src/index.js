@@ -32,6 +32,7 @@ Promise.all([
 	}
 ]) => {
 	const slack = slackCreator({ publish })
+	console.log('Raspberry pi model', model)
 	return initAppController({
 		publish,
 		subscribe,
