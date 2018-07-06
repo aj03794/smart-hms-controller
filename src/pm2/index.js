@@ -18,7 +18,7 @@ export const pm2Functions = ({
     const pm2Save = () => new Promise((resolve, reject) => {
         exec(`pm2 save`, (err, stdout, stderr) => {
             if (err) {
-                console.log('Error occurred when saving apps')
+                console.log('Error occurred when saving apps', err)
                 return reject()
             }
             console.log('Pm2 apps saved')

@@ -4,6 +4,6 @@ export const saveApps = ({
 	pm2Save()
 	.then(resolve)
 	.catch(err => {
-		console.log('saveApps failed')
+		console.log('saveApps failed', err)
 	})
 })
