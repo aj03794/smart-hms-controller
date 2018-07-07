@@ -1,4 +1,4 @@
-import { exec } from 'process'
+import { exec } from 'child_process'
 
 export const pm2Functions = ({
     pm2
