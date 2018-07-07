@@ -5,10 +5,12 @@ export const checkForApp = ({
 }) => new Promise((resolve, reject) => {
 	pm2List()
 	.then(processes => {
+		console.log('App name', appName)
 		const match = processes.find(process => {
-			process.name === appName
+			console.log('process.name', process.name)
+			return process.name === appName
 		}) ? true : false
-		return Promise.resolve(match)
+		console.log('Match', match)
+		return resolve({ appExists: match})
 	})
-	.then(match => resolve({ appExists: match}))
 })

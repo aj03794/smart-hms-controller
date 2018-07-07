@@ -16,14 +16,9 @@ export const handleApp = ({
 	},
 	appVersion
 }) => () => new Promise((resolve, reject) => {
-	console.log('appName', appName)
 	const folder = resolvePath(cwd(), 'apps')
-	console.log('folder', folder)
 	checkForApp({ appName })
-	.then(({ appExists }) => {
-		if (appExists) deleteApp({ appExists, appName, folder })
-		return Promise.resolve()
-	})
+	.then(({ appExists }) =>  deleteApp({ appExists, appName, folder }))
 	.then(() => retrieveApp({ appName, appLocation, port, address, folder, appVersion }))
 	.then(({ zip }) => {
 		return unzipDir({

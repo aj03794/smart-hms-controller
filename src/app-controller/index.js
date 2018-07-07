@@ -39,7 +39,7 @@ export const initAppController = ({
 		unzip
 	})
 	const checkForApp = checkForAppCreator({ pm2List })
-	const deleteApp = deleteAppCreator({ pm2Delete, removeSync, existsSync })
+	const deleteApp = deleteAppCreator({ pm2Delete, removeSync, existsSync, resolvePath })
 	const saveApps = saveAppsCreator({ pm2Save })
 	const retrieveApp = retrieveAppCreator({
 		resolvePath,
