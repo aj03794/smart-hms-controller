@@ -60,7 +60,7 @@ export const initAppController = ({
 
 			const {
 				appName,
-			} = msg.data[1]
+			} = JSON.parse(msg.data[1])
 
 			const handleApp = handleAppCreator({
 				checkForApp,
